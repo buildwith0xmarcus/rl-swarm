@@ -61,15 +61,7 @@ ROOT_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
 
 # Function to clean up the server process upon exit
 cleanup() {
-    echo_green ">> Shutting down trainer..."
-
-    # Remove modal credentials if they exist
-    rm -r $ROOT_DIR/modal-login/temp-data/*.json 2> /dev/null || true
-
-    # Kill all processes belonging to this script's process group
-    kill -- -$$ || true
-
-    exit 0
+  
 }
 
 errnotify() {
@@ -186,35 +178,14 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
     sleep 5
 
     # Try to open the URL in the default browser
-    if open http://localhost:3000 2> /dev/null; then
-        echo_green ">> Successfully opened http://localhost:3000 in your default browser."
-    else
-        echo ">> Failed to open http://localhost:3000. Please open it manually."
-    fi
-
+  
     cd ..
 
-    echo_green ">> Waiting for modal userData.json to be created..."
-    while [ ! -f "modal-login/temp-data/userData.json" ]; do
-        sleep 5  # Wait for 5 seconds before checking again
-    done
+
     echo "Found userData.json. Proceeding..."
 
-    ORG_ID=$(awk 'BEGIN { FS = "\"" } !/^[ \t]*[{}]/ { print $(NF - 1); exit }' modal-login/temp-data/userData.json)
-    echo "Your ORG_ID is set to: $ORG_ID"
 
-    # Wait until the API key is activated by the client
-    echo "Waiting for API key to become activated..."
-    while true; do
-        STATUS=$(curl -s "http://localhost:3000/api/get-api-key-status?orgId=$ORG_ID")
-        if [[ "$STATUS" == "activated" ]]; then
-            echo "API key is activated! Proceeding..."
-            break
-        else
-            echo "Waiting for API key to be activated..."
-            sleep 5
-        fi
-    done
+
 fi
 
 echo_green ">> Getting requirements..."
